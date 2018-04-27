@@ -18,6 +18,7 @@ namespace MainForm
         {
             InitializeComponent();
         }
+        private List<Stock> stockList;
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
@@ -56,9 +57,10 @@ namespace MainForm
                 //Display ticker and price for each stock requested in batch.
                 foreach (var j in v)
                 {
-                    var i = j.First.First.First;
+                    JToken i = j.First.First.First;
+                    Stock stockShow = FillStock(i);
                     var ticker = i.SelectToken("symbol");
-                    var price = i.SelectToken("close");
+                    var price = i.SelectToken("latestPrice");
 
                     DisplayBox.AppendText($"{ticker} : {price}");
                     DisplayBox.AppendText(Environment.NewLine);
@@ -68,14 +70,26 @@ namespace MainForm
             {
                 var v = JToken.Parse(json);
                 var mainStuff = v.First.First;
+                Stock stockShow = FillStock(mainStuff);
                 var ticker = mainStuff.SelectToken("symbol");
                 var price = mainStuff.SelectToken("close");
 
                 DisplayBox.Text += ($"{ticker} : {price}");
+                DisplayBox.AppendText(Environment.NewLine);
+                DisplayBox.AppendText(stockShow.ToString());
             }
+        }
 
-            Console.WriteLine("Press any key to exit");
-            Console.Read();
+        private Stock FillStock(JToken i)
+        {
+            var name = i.SelectToken("companyName");
+            var ticker = i.SelectToken("symbol");
+            var price = i.SelectToken("latestPrice");
+            var dH = i.SelectToken("high");
+            var dL = i.SelectToken("low");
+            var ltH = i.SelectToken("week52High");
+            var ltL = i.SelectToken("week52Low");
+            return new Stock((string)name,(string)ticker,(float)price, (float)dH, (float)dL, (float)ltH, (float)ltL);
         }
     }
 }
