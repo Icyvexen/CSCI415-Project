@@ -65,7 +65,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(881, 516);
             this.Controls.Add(this.batchOrderCheck);
             this.Controls.Add(this.DisplayBox);
             this.Controls.Add(this.searchButton);
