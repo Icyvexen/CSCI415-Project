@@ -61,9 +61,11 @@ namespace MainForm
                     Stock stockShow = FillStock(i);
                     var ticker = i.SelectToken("symbol");
                     var price = i.SelectToken("latestPrice");
+                    var peRat = i.SelectToken("peRatio");
 
-                    DisplayBox.AppendText($"{ticker} : {price}");
+                    DisplayBox.AppendText($"{ticker} : {price} : {peRat}");
                     DisplayBox.AppendText(Environment.NewLine);
+                    MessageBox.Show(j.ToString());
                 }
             }
             else
@@ -73,8 +75,10 @@ namespace MainForm
                 Stock stockShow = FillStock(mainStuff);
                 var ticker = mainStuff.SelectToken("symbol");
                 var price = mainStuff.SelectToken("close");
+                var peRat = mainStuff.SelectToken("peRatio");
+                var rating = stockShow.Rating;
 
-                DisplayBox.Text += ($"{ticker} : {price}");
+                DisplayBox.Text += ($"{ticker} : {price} : {peRat} : {rating}");
                 DisplayBox.AppendText(Environment.NewLine);
                 DisplayBox.AppendText(stockShow.ToString());
             }
@@ -89,7 +93,9 @@ namespace MainForm
             var dL = i.SelectToken("low");
             var ltH = i.SelectToken("week52High");
             var ltL = i.SelectToken("week52Low");
-            return new Stock((string)name,(string)ticker,(float)price, (float)dH, (float)dL, (float)ltH, (float)ltL);
+            var ytdC = i.SelectToken("ytdChange");
+            var peR = i.SelectToken("peRatio");
+            return new Stock((string)name,(string)ticker,(float)price, (float)dH, (float)dL, (float)ltH, (float)ltL, (float) ytdC, (float) peR);
         }
     }
 }

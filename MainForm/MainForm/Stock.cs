@@ -15,6 +15,9 @@ namespace MainForm
         private float dayLow;
         private float longTermHigh;
         private float longTermLow;
+        private float ytdChange;
+        private float peRatio;
+        private float rating;
 
         public string Name
         {
@@ -51,8 +54,23 @@ namespace MainForm
             get { return longTermLow; }
             set { }
         }
+        public float YTDChange
+        {
+            get { return ytdChange; }
+            set { }
+        }
+        public float PERatio
+        {
+            get { return peRatio; }
+            set { }
+        }
+        public float Rating
+        {
+            get { return rating; }
+            set { }
+        }
 
-        public Stock(string nm, string tckr, float crvl, float dayH, float dayL, float longH, float longL)
+        public Stock(string nm, string tckr, float crvl, float dayH, float dayL, float longH, float longL, float ytdC, float peR)
         {
             name = nm;
             ticker = tckr;
@@ -61,12 +79,28 @@ namespace MainForm
             dayLow = dayL;
             longTermHigh = longH;
             longTermLow = longL;
+            ytdChange = ytdC;
+            peRatio = peR;
+            rating = CalcRating();
         }
+
+        private float CalcRating()
+        {
+            float toReturn = 0;
+            toReturn += peRatio;
+            toReturn += (longTermHigh - longTermLow) * ytdChange;
+            return toReturn;
+        }
+
         override
         public string ToString()
         {
             string toReturn = "";
-            toReturn += "Name: " + name + " Ticker: " + ticker + " Current Value: " + currentValue + "\nDay High: " + dayHigh + " Day Low: " + dayLow + "\n52 Week High: " + longTermHigh + " 52 Week Low: " + longTermLow;
+            toReturn += "Name: " + name + " Ticker: " + ticker + " Current Value: " + currentValue;
+            toReturn += "\nDay High: " + dayHigh + " Day Low: " + dayLow;
+            toReturn += "\n52 Week High: " + longTermHigh + " 52 Week Low: " + longTermLow;
+            toReturn += "\nYear-to-Date Change: " + ytdChange + " Price to Earnings Ratio: " + peRatio + " Calculated Rating: " + rating + "\n";
+
             return toReturn;
         }
     }
