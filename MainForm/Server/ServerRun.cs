@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using MainForm;
+using Newtonsoft.Json.Linq;
 
 namespace Server
 {
@@ -19,10 +21,13 @@ namespace Server
             Console.WriteLine("Listening...");
             listener.Start();
 
+            //Main form stuff
+            Stock_Crawler crawl = new Stock_Crawler();
+            crawl.CrawlTickers();
+            string json;
+
             //---incoming client connected---
             TcpClient client = listener.AcceptTcpClient();
-            while (true)
-            {
                 //---get the incoming data through a network stream---
                 NetworkStream nwStream = client.GetStream();
                 byte[] buffer = new byte[client.ReceiveBufferSize];
@@ -33,24 +38,35 @@ namespace Server
                 //---convert the data received into a string---
                 string dataReceived = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                 Console.WriteLine("Received : " + dataReceived);
-                if (dataReceived.ToUpper().Equals("END"))
+
+                //Stock logic
+                using (var web = new WebClient())
                 {
-                    //---write back the text to the client---
-                    Console.WriteLine("End Received. Sending back : " + dataReceived);
-                    nwStream.Write(buffer, 0, bytesRead);
-                    break;
+                    var url = $"";
+                    //If batch, special URL used
+                    url = $"https://api.iextrading.com/1.0/stock/{dataReceived}/book/";
+
+                    //Download the returned API call as a string
+                    json = web.DownloadString(url);
+                    Console.WriteLine(url);
                 }
-                else
-                {
-                    //---write back the text to the client---
-                    Console.WriteLine("Sending back : " + dataReceived);
-                    nwStream.Write(buffer, 0, bytesRead);
-                }
-            }
+                json = json.Replace("//", "");
+                var v = JToken.Parse(json);
+                var mainStuff = v.First.First;
+                Stock stockShow = crawl.FillStock(mainStuff);
+
+
+
+                //---write back the text to the client---
+                Console.WriteLine("End Received. Sending back : " + stockShow.ToString());
+                byte[] bytesToSend = ASCIIEncoding.ASCII.GetBytes(stockShow.ToString());
+                nwStream.Write(bytesToSend, 0, bytesToSend.Length);
+
             client.Close();
             listener.Stop();
             Console.WriteLine("Press enter to close...");
             Console.ReadLine();
+            
         }
     }
 }

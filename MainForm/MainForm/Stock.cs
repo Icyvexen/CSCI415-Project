@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace MainForm
 {
-    class Stock
+    [Serializable()]
+    public class Stock
     {
         private string name;
         private string ticker;

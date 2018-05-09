@@ -30,7 +30,6 @@
         {
             this.searchButton = new System.Windows.Forms.Button();
             this.DisplayBox = new System.Windows.Forms.TextBox();
-            this.batchOrderCheck = new System.Windows.Forms.CheckBox();
             this.ButtonServerTest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
@@ -52,16 +51,6 @@
             this.DisplayBox.Size = new System.Drawing.Size(355, 379);
             this.DisplayBox.TabIndex = 1;
             // 
-            // batchOrderCheck
-            // 
-            this.batchOrderCheck.AutoSize = true;
-            this.batchOrderCheck.Location = new System.Drawing.Point(32, 100);
-            this.batchOrderCheck.Name = "batchOrderCheck";
-            this.batchOrderCheck.Size = new System.Drawing.Size(60, 17);
-            this.batchOrderCheck.TabIndex = 2;
-            this.batchOrderCheck.Text = "Batch?";
-            this.batchOrderCheck.UseVisualStyleBackColor = true;
-            // 
             // ButtonServerTest
             // 
             this.ButtonServerTest.Location = new System.Drawing.Point(15, 158);
@@ -78,7 +67,6 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(881, 516);
             this.Controls.Add(this.ButtonServerTest);
-            this.Controls.Add(this.batchOrderCheck);
             this.Controls.Add(this.DisplayBox);
             this.Controls.Add(this.searchButton);
             this.Name = "Form1";
@@ -92,7 +80,6 @@
 
         private System.Windows.Forms.Button searchButton;
         private System.Windows.Forms.TextBox DisplayBox;
-        private System.Windows.Forms.CheckBox batchOrderCheck;
         private System.Windows.Forms.Button ButtonServerTest;
     }
 }

@@ -9,14 +9,13 @@ using System.Diagnostics;
 
 namespace MainForm
 {
-    class Stock_Crawler
+    public class Stock_Crawler
     {
         List<string> tickerList;
 
         public Stock_Crawler()
         {
             tickerList = new List<string>();
-            CrawlTickers();
         }
 
         public void CrawlTickers()

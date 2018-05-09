@@ -11,6 +11,9 @@ using System.Net;
 using Newtonsoft.Json.Linq;
 using Microsoft.VisualBasic;
 using System.Net.Sockets;
+using System.Runtime.Serialization;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.IO;
 
 namespace MainForm
 {
@@ -34,74 +37,82 @@ namespace MainForm
 
             //Tickers used have a max of 6 characters
             sendingText = new char[6];
-
-            //starts server
-            Server.ServerRun localServ = new Server.ServerRun();
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
         {
             //Is this a batch? True if yes
-            bool batchOrder = batchOrderCheck.Checked;
+            //bool batchOrder = batchOrderCheck.Checked;
 
             //Used to store the added tickers
             string tickers = "";
             
             //base string that represents the JSON and the input
-            string json;
             string input = "";
 
             //Goes until 'end' is entered
             while (!input.ToUpper().Equals("END"))
             {
                 ShowInputDialog(ref input);
-                //Different logic for multiple stocks
-                if (batchOrder)
+                //only adds valid tickers
+                if (!input.ToUpper().Equals("END"))
                 {
-                    //adds commas between each ticker for query
-                    if (!tickers.Equals(""))
-                    {
-                        tickers += ",";
-                    }
-                    //only adds valid tickers
-                    if (crawl.TickerContained(input.ToUpper()))
-                    {
-                        tickers += input.ToUpper();
-                    }
-                }
-                //if singular stock, adds most recent non-'END' input
-                else
-                {
-                    if (crawl.TickerContained(input.ToUpper()))
-                    {
-                        tickers = input.ToUpper();
-                    }
+                    tickers = input.ToUpper();
                 }
             }
-
-            //use web as a webclient to allow API access
-            using (var web = new WebClient())
+            //Networking section
+            try
             {
-                if (input.Equals(""))
-                {
-                    input = "AAPL";
-                }
-                var url = $"";
-                //If batch, special URL used
-                if (batchOrder)
-                {
-                    url = $"https://api.iextrading.com/1.0/stock/market/batch?symbols={tickers}&types=quote";
-                }
-                else
-                {
-                    url = $"https://api.iextrading.com/1.0/stock/{tickers}/book/";
-                }
-                //Download the returned API call as a string
-                json = web.DownloadString(url);
-            }
+                //Defines arrays to be used
+                char[] textToSend = new char[0];
+                byte[] bytesToRead = new byte[0];
+                byte[] bytesToSend = new byte[0];
+                int bytesRead = 0;
 
-            json = json.Replace("//", "");
-            if (batchOrder)
+                //Initializes NetworkStream and TCPClient
+                TcpClient client = new TcpClient(SERVER_IP, PORT_NO);
+                NetworkStream nwStream = client.GetStream();
+                textToSend = tickers.ToCharArray();
+
+                bytesToSend = ASCIIEncoding.ASCII.GetBytes(textToSend);
+                MessageBox.Show("Sending : " + tickers);
+                nwStream.Write(bytesToSend, 0, bytesToSend.Length);
+
+                //---read back the text---
+                bytesToRead = new byte[client.ReceiveBufferSize];
+                bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
+                string returned = Encoding.ASCII.GetString(bytesToRead, 0, bytesRead);
+                Console.WriteLine("Received : " + returned);
+                DisplayBox.AppendText(returned);
+                client.Close();
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.ToString());
+            }
+            /*{
+            //    //use web as a webclient to allow API access
+            //    using (var web = new WebClient())
+            //    {
+            //        if (input.Equals(""))
+            //        {
+            //            input = "AAPL";
+            //        }
+            //        var url = $"";
+            //        //If batch, special URL used
+            //        if (batchOrder)
+            //        {
+            //            url = $"https://api.iextrading.com/1.0/stock/market/batch?symbols={tickers}&types=quote";
+            //        }
+            //        else
+            //        {
+            //            url = $"https://api.iextrading.com/1.0/stock/{tickers}/book/";
+            //        }
+            //        //Download the returned API call as a string
+            //        json = web.DownloadString(url);
+            //    }
+            //}//Moved JSON
+            //json = json.Replace("//", "");
             {
                 //Parse the json string to a JSON object
                 var v = JToken.Parse(json);
@@ -118,8 +129,7 @@ namespace MainForm
                     DisplayBox.AppendText(Environment.NewLine);
                     DisplayBox.AppendText(stockShow.ToString());
                 }
-            }
-            else
+            }//Old JSON Batch Code
             {
                 var v = JToken.Parse(json);
                 var mainStuff = v.First.First;
@@ -132,7 +142,7 @@ namespace MainForm
                 DisplayBox.Text += ($"{ticker} : {price} : {peRat} : {rating}");
                 DisplayBox.AppendText(Environment.NewLine);
                 DisplayBox.AppendText(stockShow.ToString());
-            }
+            }//Old JSON Solo Code*/
         }
 
         private static DialogResult ShowInputDialog(ref string input)
@@ -183,7 +193,7 @@ namespace MainForm
 
         private void ButtonServerTest_Click(object sender, EventArgs e)
         {
-            char[] textToSend = new char[4];
+            char[] textToSend = new char[0];
             byte[] bytesToRead = new byte[0];
             byte[] bytesToSend = new byte[0];
             int bytesRead;
@@ -194,13 +204,14 @@ namespace MainForm
             while (true)
             {
                 textToSend = toArray.ToCharArray();
-
-                //---create a TCPClient object at the IP and port no.---
+                
                 bytesToSend = ASCIIEncoding.ASCII.GetBytes(textToSend);
 
                 //---send the text---
                 Console.WriteLine("Sending : " + toArray);
                 nwStream.Write(bytesToSend, 0, bytesToSend.Length);
+
+
                 if (toArray.Equals("END"))
                 {
                     Console.WriteLine("Sending END...");
