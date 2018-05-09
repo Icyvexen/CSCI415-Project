@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using System.Net;
 using Newtonsoft.Json.Linq;
 using Microsoft.VisualBasic;
+using System.Net.Sockets;
 
 namespace MainForm
 {
@@ -35,7 +36,7 @@ namespace MainForm
             sendingText = new char[6];
 
             //starts server
-            Server localServ = new Server();
+            Server.ServerRun localServ = new Server.ServerRun();
         }
 
         private void SearchButton_Click(object sender, EventArgs e)
@@ -178,6 +179,46 @@ namespace MainForm
             DialogResult result = inputBox.ShowDialog();
             input = textBox.Text;
             return result;
+        }
+
+        private void ButtonServerTest_Click(object sender, EventArgs e)
+        {
+            char[] textToSend = new char[4];
+            byte[] bytesToRead = new byte[0];
+            byte[] bytesToSend = new byte[0];
+            int bytesRead;
+            TcpClient client = new TcpClient(SERVER_IP, PORT_NO);
+            NetworkStream nwStream = client.GetStream();
+
+            string toArray = "MAKEANAMEND";
+            while (true)
+            {
+                textToSend = toArray.ToCharArray();
+
+                //---create a TCPClient object at the IP and port no.---
+                bytesToSend = ASCIIEncoding.ASCII.GetBytes(textToSend);
+
+                //---send the text---
+                Console.WriteLine("Sending : " + toArray);
+                nwStream.Write(bytesToSend, 0, bytesToSend.Length);
+                if (toArray.Equals("END"))
+                {
+                    Console.WriteLine("Sending END...");
+                    bytesToRead = new byte[client.ReceiveBufferSize];
+                    bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
+                    Console.WriteLine("Received : " + Encoding.ASCII.GetString(bytesToRead, 0, bytesRead));
+                    client.Close();
+                    break;
+                }
+                //---read back the text---
+                bytesToRead = new byte[client.ReceiveBufferSize];
+                bytesRead = nwStream.Read(bytesToRead, 0, client.ReceiveBufferSize);
+                Console.WriteLine("Received : " + Encoding.ASCII.GetString(bytesToRead, 0, bytesRead));
+                toArray = toArray.Substring(1);
+            }
+
+            Console.WriteLine("Press Enter to close...");
+            Console.ReadLine();
         }
     }
 }
