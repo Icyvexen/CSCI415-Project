@@ -64,7 +64,7 @@ namespace MainForm
                 //Download the returned API call as a string
                 json = web.DownloadString(url).Replace("//", "");
             }
-            var v = JToken.Parse(json);
+            var v = JToken.Parse(json).First.First;
 
             toReturn = FillStock(v);
             return toReturn;
@@ -73,17 +73,72 @@ namespace MainForm
         public Stock FillStock(JToken i)
         {
             var name = i.SelectToken("companyName");
-            var ticker = i.SelectToken("symbol");
-            var price = i.SelectToken("latestPrice");
-            var dH = i.SelectToken("high");
-            var dL = i.SelectToken("low");
-            var ltH = i.SelectToken("week52High");
-            var ltL = i.SelectToken("week52Low");
-            var ytdC = i.SelectToken("ytdChange");
-            var peR = i.SelectToken("peRatio");
-            Stock newOne = new Stock((string)name, (string)ticker, (float)price, (float)dH, (float)dL, (float)ltH, (float)ltL, (float)ytdC, (float)peR);
-            scannedStocks.Add(newOne);
-            return newOne;
+            if (!name.Value<string>().Equals(""))
+            {
+                var ticker = i.SelectToken("symbol");
+                var price = i.SelectToken("latestPrice");
+                var ytdC = i.SelectToken("ytdChange");
+
+                float dH = 0.0f;
+                float dL = 0.0f;
+                float peR = 0.0f;
+                float ltH = 0.0f;
+                float ltL = 0.0f;
+
+                if (float.TryParse(i.SelectToken("peRatio").ToString(), out peR))
+                {
+                    peR = float.Parse(i.SelectToken("peRatio").ToString());
+                }
+                if (peR.Equals(null))
+                {
+                    peR = 0.0f;
+                }
+
+                if (float.TryParse(i.SelectToken("high").ToString(), out dH))
+                {
+                    dH = float.Parse(i.SelectToken("high").ToString());
+                }
+                if (dH.Equals(null))
+                {
+                    dH = (float)price;
+                }
+                if (float.TryParse(i.SelectToken("low").ToString(), out dL))
+                {
+                    dL = float.Parse(i.SelectToken("low").ToString());
+                }
+                if (peR.Equals(null))
+                {
+                    peR = (float)price;
+                }
+
+                if (float.TryParse(i.SelectToken("week52High").ToString(), out ltH))
+                {
+                    ltH = float.Parse(i.SelectToken("week52High").ToString());
+                }
+                if (peR.Equals(null))
+                {
+                    ltH = dH;
+                }
+                if (float.TryParse(i.SelectToken("week52Low").ToString(), out ltL))
+                {
+                    ltL = float.Parse(i.SelectToken("week52Low").ToString());
+                }
+                if (peR.Equals(null))
+                {
+                    ltL = dL;
+                }
+
+                Stock newOne = new Stock((string)name, (string)ticker, (float)price, (float)dH, (float)dL, (float)ltH, (float)ltL, (float)ytdC, (float)peR);
+                scannedStocks.Add(newOne);
+                return newOne;
+            }
+            else
+                return new Stock("NULL", "NULL", -1, -1, -1, -1, -1, -1, -1);
+        }
+
+        public List<string> GetTickers()
+        {
+            return tickerList;
         }
 
         public bool TickerContained(string check)

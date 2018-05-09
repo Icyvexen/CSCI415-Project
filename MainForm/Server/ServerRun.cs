@@ -6,15 +6,36 @@ using System.Text;
 using MainForm;
 using Newtonsoft.Json.Linq;
 
+using System.Threading;
+
 namespace Server
 {
     public class ServerRun
     {
         const int PORT_NO = 5000;
         const string SERVER_IP = "127.0.0.1";
+        
 
         public static void Main(string[] args)
         {
+            Stock_Crawler crawl = new Stock_Crawler();
+            crawl.CrawlTickers();
+            Console.WriteLine(crawl.GetTickers());
+            //Multi-threading Capabilities
+            Thread[] tArray = new Thread[11];
+            tArray[0] = new Thread(new ParameterizedThreadStart(Connection));
+            tArray[0].Start(crawl);
+            List<String> tA = crawl.GetTickers();
+            tArray[1] = new Thread(() => CrawlUpdater(tA, crawl));
+            tArray[1].Start();
+            Console.WriteLine("Press enter to close...");
+            Console.ReadLine();
+            
+        }
+
+        public static void Connection(Object stockC)
+        {
+            Stock_Crawler crawl = (Stock_Crawler)stockC;
             //---listen at the specified IP and port no.---
             IPAddress localAdd = IPAddress.Parse(SERVER_IP);
             TcpListener listener = new TcpListener(localAdd, PORT_NO);
@@ -22,8 +43,6 @@ namespace Server
             listener.Start();
 
             //Main form stuff
-            Stock_Crawler crawl = new Stock_Crawler();
-            crawl.CrawlTickers();
             string json;
 
             //---incoming client connected---
@@ -56,9 +75,7 @@ namespace Server
             var mainStuff = v.First.First;
             Stock stockShow = crawl.FillStock(mainStuff);
 
-
-
-                //---write back the text to the client---
+            //---write back the text to the client---
             Console.WriteLine("End Received. Sending back : " + stockShow.ToString());
             string toSend = stockShow.ToString();
             switch (stockShow.Rating)
@@ -88,9 +105,24 @@ namespace Server
 
             client.Close();
             listener.Stop();
-            Console.WriteLine("Press enter to close...");
-            Console.ReadLine();
-            
+
+        }
+
+        public static void CrawlUpdater(Object ticks, Object sC)
+        {
+            List<String> tickers = (List<string>)ticks;
+            Console.WriteLine("Print Tickers");
+            foreach(string x in tickers)
+            {
+                Console.WriteLine(x);
+            }
+            Stock_Crawler y = (Stock_Crawler)sC;
+            foreach(string x in tickers){
+                Stock dummy = y.CrawlStock(x);
+                Console.WriteLine(dummy.ToString());
+                //Sleeping to meet API compliance
+                Thread.Sleep(15);
+            }
         }
     }
 }
