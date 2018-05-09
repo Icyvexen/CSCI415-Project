@@ -25,6 +25,8 @@ namespace MainForm
         //Port and IP to connect to (for most purposes will be 127.0.0.1 until further testing done).
         const int PORT_NO = 5000;
         const string SERVER_IP = "127.0.0.1";
+        TcpClient client;
+        NetworkStream nwStream;
 
         //array of characters to send in buffer stream.
         char[] sendingText;
@@ -34,6 +36,9 @@ namespace MainForm
 
             //Initialize stock crawler
             crawl = new Stock_Crawler();
+
+            client = new TcpClient(SERVER_IP, PORT_NO);
+            nwStream = client.GetStream();
 
             //Tickers used have a max of 6 characters
             sendingText = new char[6];
@@ -70,8 +75,6 @@ namespace MainForm
                 int bytesRead = 0;
 
                 //Initializes NetworkStream and TCPClient
-                TcpClient client = new TcpClient(SERVER_IP, PORT_NO);
-                NetworkStream nwStream = client.GetStream();
                 textToSend = tickers.ToCharArray();
 
                 bytesToSend = ASCIIEncoding.ASCII.GetBytes(textToSend);
@@ -84,7 +87,6 @@ namespace MainForm
                 string returned = Encoding.ASCII.GetString(bytesToRead, 0, bytesRead);
                 Console.WriteLine("Received : " + returned);
                 DisplayBox.AppendText(returned);
-                client.Close();
             }
             catch(Exception ex)
             {
