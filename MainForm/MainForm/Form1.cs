@@ -15,58 +15,65 @@ namespace MainForm
 {
     public partial class Form1 : Form
     {
-        public Form1()
-        {
-            InitializeComponent();
-        }
         //Stock_Crawler to collect data
         Stock_Crawler crawl;
 
+        //Port and IP to connect to (for most purposes will be 127.0.0.1 until further testing done).
+        const int PORT_NO = 5000;
+        const string SERVER_IP = "127.0.0.1";
+
+        //array of characters to send in buffer stream.
+        char[] sendingText;
+        public Form1()
+        {
+            InitializeComponent();
+
+            //Initialize stock crawler
+            crawl = new Stock_Crawler();
+
+            //Tickers used have a max of 6 characters
+            sendingText = new char[6];
+
+            //starts server
+            Server localServ = new Server();
+        }
+
         private void SearchButton_Click(object sender, EventArgs e)
         {
-            crawl = new Stock_Crawler();
             //Is this a batch? True if yes
             bool batchOrder = batchOrderCheck.Checked;
-            //Comma separated list of tickers to use as standby
 
-            //TODO: Add custom ticker ability
+            //Used to store the added tickers
             string tickers = "";
-
-            //base string that represents the JSON
+            
+            //base string that represents the JSON and the input
             string json;
             string input = "";
-            while (!crawl.TickerContained(input.ToUpper()))
+
+            //Goes until 'end' is entered
+            while (!input.ToUpper().Equals("END"))
             {
                 ShowInputDialog(ref input);
+                //Different logic for multiple stocks
                 if (batchOrder)
                 {
-                    if (input.ToUpper().Equals("END"))
+                    //adds commas between each ticker for query
+                    if (!tickers.Equals(""))
                     {
-                        input = "GOOG";
-                        break;
+                        tickers += ",";
                     }
-                    else
+                    //only adds valid tickers
+                    if (crawl.TickerContained(input.ToUpper()))
                     {
-                        if (tickers.Equals("") && crawl.TickerContained(input.ToUpper()))
-                        {
-                            tickers += input.ToUpper();
-                        }
-                        else if (crawl.TickerContained(input.ToUpper()))
-                        {
-                            tickers += "," + input.ToUpper();
-                        }
+                        tickers += input.ToUpper();
                     }
                 }
+                //if singular stock, adds most recent non-'END' input
                 else
                 {
-                    if (input.ToUpper().Equals("END"))
+                    if (crawl.TickerContained(input.ToUpper()))
                     {
-                        input = "GOOG";
-                        break;
-                    }
-                    else if (crawl.TickerContained(input.ToUpper()))
-                    {
-                        input = input.ToUpper();
+                        tickers = input.ToUpper();
                     }
                 }
             }
@@ -74,6 +81,10 @@ namespace MainForm
             //use web as a webclient to allow API access
             using (var web = new WebClient())
             {
+                if (input.Equals(""))
+                {
+                    input = "AAPL";
+                }
                 var url = $"";
                 //If batch, special URL used
                 if (batchOrder)
@@ -82,7 +93,7 @@ namespace MainForm
                 }
                 else
                 {
-                    url = $"https://api.iextrading.com/1.0/stock/{input}/book/";
+                    url = $"https://api.iextrading.com/1.0/stock/{tickers}/book/";
                 }
                 //Download the returned API call as a string
                 json = web.DownloadString(url);
@@ -93,7 +104,7 @@ namespace MainForm
             {
                 //Parse the json string to a JSON object
                 var v = JToken.Parse(json);
-                //Display ticker and price for each stock requested in batch.
+                //Display ticker and other info for each stock requested in batch.
                 foreach (var j in v)
                 {
                     JToken i = j.First.First.First;
@@ -104,7 +115,7 @@ namespace MainForm
 
                     DisplayBox.AppendText($"{ticker} : {price} : {peRat}");
                     DisplayBox.AppendText(Environment.NewLine);
-                    MessageBox.Show(j.ToString());
+                    DisplayBox.AppendText(stockShow.ToString());
                 }
             }
             else
@@ -123,15 +134,9 @@ namespace MainForm
             }
         }
 
-        private void ButtonTestAllTickers_Click(object sender, EventArgs e)
-        {
-            crawl = new Stock_Crawler();
-            crawl.CrawlTickers();
-        }
-
         private static DialogResult ShowInputDialog(ref string input)
         {
-            Size size = new Size(200, 70);
+            Size size = new Size(200, 100);
             Form inputBox = new Form
             {
                 FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog,
@@ -151,8 +156,8 @@ namespace MainForm
             {
                 DialogResult = System.Windows.Forms.DialogResult.OK,
                 Name = "okButton",
-                Size = new System.Drawing.Size(75, 23),
-                Text = "&OK",
+                Size = new System.Drawing.Size(75, 60),
+                Text = "&OK (Type 'END' to end)",
                 Location = new System.Drawing.Point(size.Width - 80 - 80, 39)
             };
             inputBox.Controls.Add(okButton);
