@@ -30,12 +30,11 @@
         {
             this.searchButton = new System.Windows.Forms.Button();
             this.DisplayBox = new System.Windows.Forms.TextBox();
-            this.ButtonServerTest = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // searchButton
             // 
-            this.searchButton.Location = new System.Drawing.Point(15, 16);
+            this.searchButton.Location = new System.Drawing.Point(12, 33);
             this.searchButton.Name = "searchButton";
             this.searchButton.Size = new System.Drawing.Size(122, 52);
             this.searchButton.TabIndex = 0;
@@ -51,22 +50,11 @@
             this.DisplayBox.Size = new System.Drawing.Size(355, 379);
             this.DisplayBox.TabIndex = 1;
             // 
-            // ButtonServerTest
-            // 
-            this.ButtonServerTest.Location = new System.Drawing.Point(15, 158);
-            this.ButtonServerTest.Name = "ButtonServerTest";
-            this.ButtonServerTest.Size = new System.Drawing.Size(121, 55);
-            this.ButtonServerTest.TabIndex = 3;
-            this.ButtonServerTest.Text = "Server Test";
-            this.ButtonServerTest.UseVisualStyleBackColor = true;
-            this.ButtonServerTest.Click += new System.EventHandler(this.ButtonServerTest_Click);
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(881, 516);
-            this.Controls.Add(this.ButtonServerTest);
             this.Controls.Add(this.DisplayBox);
             this.Controls.Add(this.searchButton);
             this.Name = "Form1";
@@ -80,7 +68,6 @@
 
         private System.Windows.Forms.Button searchButton;
         private System.Windows.Forms.TextBox DisplayBox;
-        private System.Windows.Forms.Button ButtonServerTest;
     }
 }
 

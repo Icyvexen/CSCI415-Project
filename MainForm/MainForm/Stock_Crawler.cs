@@ -12,10 +12,12 @@ namespace MainForm
     public class Stock_Crawler
     {
         List<string> tickerList;
+        List<Stock> scannedStocks;
 
         public Stock_Crawler()
         {
             tickerList = new List<string>();
+            scannedStocks = new List<Stock>();
         }
 
         public void CrawlTickers()
@@ -79,7 +81,9 @@ namespace MainForm
             var ltL = i.SelectToken("week52Low");
             var ytdC = i.SelectToken("ytdChange");
             var peR = i.SelectToken("peRatio");
-            return new Stock((string)name, (string)ticker, (float)price, (float)dH, (float)dL, (float)ltH, (float)ltL, (float)ytdC, (float)peR);
+            Stock newOne = new Stock((string)name, (string)ticker, (float)price, (float)dH, (float)dL, (float)ltH, (float)ltL, (float)ytdC, (float)peR);
+            scannedStocks.Add(newOne);
+            return newOne;
         }
 
         public bool TickerContained(string check)
